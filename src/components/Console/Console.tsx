@@ -6,6 +6,7 @@ import fullScreenIcon from './fullScreenIcon.svg';
 import dotsIcon from './dotsIcon.svg';
 import formatIcon from './formatIcon.svg';
 import clearIcon from './clearIcon.svg';
+import exitScreenIcon from './exitScreenIcon.svg';
 
 const Header = styled.section`
 	padding: 10px 15px;
@@ -62,8 +63,8 @@ const LogoutButton = styled.button`
 	}
 `;
 
-const FullScreenButton = styled.div`
-	background: url(${fullScreenIcon});
+const FullScreenButton = styled.div<IFullScreenButtonProps>`
+	background: url(${props => props.fullScreen ? exitScreenIcon : fullScreenIcon});
 	width: 20px;
 	height: 20px;
 	margin-left: 20px;
@@ -195,12 +196,45 @@ const FormatButton = styled.button`
 		height: 24px;
 		position: absolute;
 		left: 0;
+		top: -3px;
 	}
 `;
 
 const Console = ({ onLogout, subLogin }: IProps) => {
+	const ref = React.useRef<HTMLElement | null>(null);
+	const [isFullScreen, setIsFullScreen] = React.useState(window.innerHeight === screen.height);
+
+	React.useEffect(() => {
+		const fullScreenDetect = () => {
+			if (document.fullscreenElement) {
+				setIsFullScreen(true);
+			} else {
+				setIsFullScreen(false);
+			}
+		};
+
+		document.addEventListener('fullscreenchange', fullScreenDetect);
+
+		return () => {
+			document.removeEventListener('fullscreenchange', fullScreenDetect);
+		};
+	}, []);
+
+	const onClickFullScreenButton = () => {
+		if (ref.current) {
+
+			if (!isFullScreen) {
+				ref.current.requestFullscreen();
+				setIsFullScreen(true);
+			} else {
+				document.exitFullscreen();
+				setIsFullScreen(false);
+			}
+		}
+	};
+
 	return (
-		<section>
+		<section ref={ref}>
 			<Header>
 				<FlexCotainer>
 					<Logo />
@@ -210,7 +244,7 @@ const Console = ({ onLogout, subLogin }: IProps) => {
 				<FlexCotainer>
 					<SubLogin>{subLogin} <SubLoginDots>:</SubLoginDots> sublogin</SubLogin>
 					<LogoutButton onClick={onLogout}>Выйти</LogoutButton>
-					<FullScreenButton />
+					<FullScreenButton fullScreen={isFullScreen} onClick={onClickFullScreenButton} />
 				</FlexCotainer>
 			</Header>
 
@@ -250,4 +284,8 @@ export default React.memo(Console);
 interface IProps {
 	subLogin: string | null;
 	onLogout: () => void;
+}
+
+interface IFullScreenButtonProps {
+	fullScreen: boolean;
 }
