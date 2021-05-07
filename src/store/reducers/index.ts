@@ -1,0 +1,7 @@
+export { default as rootReducer } from './auth';
+
+// import login from 'src/store/reducers/auth';
+
+// export default {
+//   ...login,
+// };
