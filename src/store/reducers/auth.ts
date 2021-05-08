@@ -7,10 +7,8 @@ const initialState: IInitialState = {
 	sessionKey: getSession() || null,
 	login: null,
 	sublogin: null,
-	error: null
+	error: null,
 };
-
-type TCombinedPayloads = ISendsayError | ISendsaySuccess | ISendsayAuthCheck;
 
 export default {
 	auth: handleActions<IInitialState, TCombinedPayloads>(
@@ -61,3 +59,5 @@ interface IInitialState {
 	sublogin: string | null;
 	error: ISendsayError | null;
 }
+
+type TCombinedPayloads = ISendsayError | ISendsaySuccess | ISendsayAuthCheck;

@@ -2,14 +2,14 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { TRootState } from 'store';
 import { Console } from 'components';
-import { logout, authenticateCheck } from 'src/store/actions/auth';
+import { logout, authenticateCheck, request } from 'actions';
 
 const ConsolePage = () => {
 	const dispatch = useDispatch();
-	const isLoading = useSelector((state: TRootState) => state.auth.loading);
 	const subLogin = useSelector((state: TRootState) => state.auth.sublogin);
-
-	console.log('loading', isLoading);
+	const isRequestLoading = useSelector((state: TRootState) => state.console.loading);
+	const response = useSelector((state: TRootState) => state.console.response);
+	const requestHistoryList = useSelector((state: TRootState) => state.console.requestHistory);
 
 	useEffect(() => {
 		dispatch(authenticateCheck());
@@ -19,7 +19,20 @@ const ConsolePage = () => {
 		dispatch(logout());
 	};
 
-	return <Console onLogout={doLogout} subLogin={subLogin} />;
+	const doRequest = (data: ISendsayRequestProps) => {
+		dispatch(request(data));
+	};
+
+	return (
+		<Console
+			isRequestLoading={isRequestLoading}
+			onLogout={doLogout}
+			subLogin={subLogin}
+			onRequest={doRequest}
+			response={response}
+			requestHistoryList={requestHistoryList}
+		/>
+	);
 };
 
 export default ConsolePage;

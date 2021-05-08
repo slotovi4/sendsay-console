@@ -1,7 +1,3 @@
-export { default as rootReducer } from './auth';
-
-// import login from 'src/store/reducers/auth';
-
-// export default {
-//   ...login,
-// };
+export { default as authReducer } from './auth';
+export { default as consoleReducer } from './console';
+export type { IHistoryRequest } from './console';

@@ -33,6 +33,12 @@
 			],
 			"cookie": [
 				"src/store/cookie"
+			],
+			"actions": [
+				"src/store/actions"
+			],
+			"reducers": [
+				"src/store/reducers"
 			]
 		}
 	},

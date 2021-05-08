@@ -48,4 +48,5 @@ interface ISendsayData {
 
 interface ISendsayRequestProps {
 	action: string;
+	id?: string;
 }

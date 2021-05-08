@@ -1,7 +1,7 @@
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist';
 import { composeWithDevTools } from 'redux-devtools-extension';
-import { rootReducer } from 'src/store/reducers';
+import { authReducer, consoleReducer } from 'src/store/reducers';
 import createSagaMiddleware from 'redux-saga';
 import storage from 'redux-persist/lib/storage';
 import rootSaga from 'src/store/sagas';
@@ -12,9 +12,11 @@ const persistConfig = {
 	storage,
 };
 
-const authReducer = persistReducer(persistConfig, rootReducer.auth);
+const auth = persistReducer(persistConfig, authReducer.auth);
+const console = persistReducer(persistConfig, consoleReducer.console);
 const combine = combineReducers({
-	auth: authReducer,
+	auth,
+	console
 });
 
 const bindMiddleware = (middleware: Array<typeof sagaMiddleware>) => {

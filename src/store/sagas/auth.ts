@@ -1,7 +1,11 @@
 import { all, put, call, takeLatest } from 'redux-saga/effects';
 import { ActionTypes } from 'src/store/constants';
-import { authenticateSuccess, authenticateFailure, authenticateCheckSuccess } from 'src/store/actions/auth';
 import { setSession, clearSession, getSession } from 'cookie';
+import { 
+	authenticateSuccess, 
+	authenticateFailure, 
+	authenticateCheckSuccess,
+} from 'actions';
 import api from 'src/helpers/sendsay';
 
 export function* authenticateCheckSaga() {
@@ -19,8 +23,8 @@ export function* authenticateCheckSaga() {
 		}
 	}
 
-	if(subLogin) {
-		yield put(authenticateCheckSuccess({subLogin}));
+	if (subLogin) {
+		yield put(authenticateCheckSuccess({ subLogin }));
 	}
 }
 
@@ -43,7 +47,7 @@ export function* authenticateSaga({ payload }: IAuthenticateSagaProps) {
 				id: err.id,
 				explain: err.explain
 			};
-			
+
 			console.log('err', err);
 		});
 

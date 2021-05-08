@@ -1,6 +1,6 @@
 import React from 'react';
-import styled from 'styled-components';
 import { Logo, Button } from 'components';
+import styled from 'styled-components';
 import logoutIcon from './logoutIcon.svg';
 import fullScreenIcon from './fullScreenIcon.svg';
 import dotsIcon from './dotsIcon.svg';
@@ -14,7 +14,6 @@ const Header = styled.section`
 	justify-content: space-between;
 	background: #F6F6F6;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-	position: relative;
 `;
 
 const Title = styled.span`
@@ -70,7 +69,14 @@ const FullScreenButton = styled.div<IFullScreenButtonProps>`
 	margin-left: 20px;
 `;
 
-const RequestHistory = Header;
+const RequestHistory = styled.section`
+	padding: 10px 15px;
+	display: flex;
+	background: #F6F6F6;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+	position: relative;
+	height: 51px;
+`;
 
 const HistoryTrack = styled.div`
 	height: 30px;
@@ -119,11 +125,11 @@ const HistoryButton = styled.div`
 	margin-left: 10px;
 `;
 
-const HitoryCodeStatus = styled.div`
+const HistoryCodeStatus = styled.div<IHistoryCodeStatusProps>`
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
-	background: #30B800;
+	background: ${props => props.success ? '#30B800' : '#CF2C00'};
 	border: 1px solid rgba(0, 0, 0, 0.2);
 	margin-right: 5px;
 `;
@@ -200,8 +206,16 @@ const FormatButton = styled.button`
 	}
 `;
 
-const Console = ({ onLogout, subLogin }: IProps) => {
+const Console = ({
+	onLogout,
+	subLogin,
+	onRequest,
+	response,
+	isRequestLoading,
+	requestHistoryList
+}: IProps) => {
 	const ref = React.useRef<HTMLElement | null>(null);
+	const [requestValue, setRequestValue] = React.useState('{"action":"track.get","id":"12345"}');
 	const [isFullScreen, setIsFullScreen] = React.useState(window.innerHeight === screen.height);
 
 	React.useEffect(() => {
@@ -219,6 +233,31 @@ const Console = ({ onLogout, subLogin }: IProps) => {
 			document.removeEventListener('fullscreenchange', fullScreenDetect);
 		};
 	}, []);
+
+	const onChangeRequestValue = (event: React.ChangeEvent<HTMLTextAreaElement> | undefined) => {
+		const value = event?.target.value;
+
+		if (value !== undefined) {
+			setRequestValue(value);
+		}
+	};
+
+	const onSubmit = () => {
+		let requestData = null;
+
+		try {
+			requestData = JSON.parse(requestValue);
+		} catch (e) {
+			alert(e);
+		}
+
+		if (requestData) {
+			onRequest({
+				action: requestData.action || '',
+				id: requestData.id || ''
+			});
+		}
+	};
 
 	const onClickFullScreenButton = () => {
 		if (ref.current) {
@@ -249,29 +288,31 @@ const Console = ({ onLogout, subLogin }: IProps) => {
 			</Header>
 
 			<RequestHistory>
-				<HistoryTrack>
-					<HitoryCodeStatus />
-					123
-					<HistoryButton />
-				</HistoryTrack>
-
-				<HistoryClearButton />
+				{requestHistoryList.map(request => (
+					<HistoryTrack key={`historyTrack_${request.id}`}>
+						<HistoryCodeStatus success={request.success} />
+						{request.action}
+						<HistoryButton />
+					</HistoryTrack>
+				))}
+				
+				{requestHistoryList.length ? <HistoryClearButton /> : null}
 			</RequestHistory>
 
 			<RequestContainer>
 				<TextAreaContainer>
 					<TextAreaLabel>Запрос:</TextAreaLabel>
-					<TextArea />
+					<TextArea value={requestValue} onChange={onChangeRequestValue} />
 				</TextAreaContainer>
 
 				<TextAreaContainer>
 					<TextAreaLabel>Ответ:</TextAreaLabel>
-					<TextArea />
+					<TextArea value={response || ''} readOnly />
 				</TextAreaContainer>
 			</RequestContainer>
 
 			<Footer>
-				<Button type='button'>Отправить</Button>
+				<Button onClick={onSubmit} isLoading={isRequestLoading} type='button'>Отправить</Button>
 				<FooterLink href='#'>@link-to-your-github</FooterLink>
 				<FormatButton>Форматировать</FormatButton>
 			</Footer>
@@ -283,9 +324,29 @@ export default React.memo(Console);
 
 interface IProps {
 	subLogin: string | null;
+	isRequestLoading: boolean;
+	response: string | null;
+	requestHistoryList: IHistoryTrack[];
 	onLogout: () => void;
+	onRequest: (data: IRequestData) => void;
 }
 
 interface IFullScreenButtonProps {
 	fullScreen: boolean;
+}
+
+interface IRequestData {
+	action: string;
+	id?: string;
+}
+
+interface IHistoryTrack {
+	success: boolean;
+	response: string;
+	action: string;
+	id: string;
+}
+
+interface IHistoryCodeStatusProps {
+	success: boolean;
 }
