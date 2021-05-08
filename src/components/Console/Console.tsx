@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import logoutIcon from './logoutIcon.svg';
 import fullScreenIcon from './fullScreenIcon.svg';
 import dotsIcon from './dotsIcon.svg';
+import dotsIconHover from './dotsIconHover.svg';
 import formatIcon from './formatIcon.svg';
 import clearIcon from './clearIcon.svg';
 import exitScreenIcon from './exitScreenIcon.svg';
@@ -119,10 +120,16 @@ const HistoryClearButton = styled.button`
 `;
 
 const HistoryButton = styled.div`
-	background: url(${dotsIcon});
+	background: url(${dotsIcon}) no-repeat center;
 	width: 4px;
-	height: 18px;
+	height: 100%;
+    padding-left: 10px;
 	margin-left: 10px;
+	transition: background 0.3s ease;
+
+	&:hover {
+		background: url(${dotsIconHover}) no-repeat center;
+	}
 `;
 
 const HistoryCodeStatus = styled.div<IHistoryCodeStatusProps>`
@@ -138,15 +145,23 @@ const RequestContainer = styled.section`
 	background: #FFFFFF;
 	height: calc(100vh - 70px - 51px - 51px);
 	padding: 10px 15px;
+	position: relative;
 `;
 
-const TextArea = styled.textarea`
+const TextArea = styled.textarea<ITextAreaProps>`
 	background: transparent;
 	border: 1px solid rgba(0, 0, 0, 0.2);
 	border-radius: 5px;
 	resize: none;
 	height: calc(100% - 20px);
 	width: 100%;
+	outline: none;
+	padding: 10px;
+
+	${props => props.isInvalid && `
+		box-shadow: 0px 0px 5px rgba(207, 44, 0, 0.5);
+		border-color: #CF2C00;
+	`};
 `;
 
 const TextAreaContainer = styled.div`
@@ -163,11 +178,12 @@ const TextAreaContainer = styled.div`
 	}
 `;
 
-const TextAreaLabel = styled.span`
+const TextAreaLabel = styled.span<TTextAreaLabelProps>`
 	display: block;
 	font-size: 12px;
 	line-height: 20px;
-	color: #999999;
+	user-select: none;
+	color: ${props => props.isInvalid ? '#CF2C00' : '#999999'};
 `;
 
 const Footer = styled.footer`
@@ -206,6 +222,17 @@ const FormatButton = styled.button`
 	}
 `;
 
+const TextAreaResizeButton = styled(HistoryButton)`
+	position: absolute;
+	left: calc(50% - 5px);
+	top: 0;
+	margin: 0;
+	padding: 0;
+	cursor: col-resize;
+	height: 100%;
+	width: 10px;
+`;
+
 const Console = ({
 	onLogout,
 	subLogin,
@@ -214,9 +241,44 @@ const Console = ({
 	isRequestLoading,
 	requestHistoryList
 }: IProps) => {
-	const ref = React.useRef<HTMLElement | null>(null);
+	const consoleRef = React.useRef<HTMLElement | null>(null);
+	const textAreaResizeButtonRef = React.useRef<HTMLDivElement | null>(null);
+	const leftTextAreaBlockRef = React.useRef<HTMLDivElement | null>(null);
+	const rightTextAreaBlockRef = React.useRef<HTMLDivElement | null>(null);
+	const isInvalidResponseData = Boolean(requestHistoryList && requestHistoryList.length ? !requestHistoryList[0].success : false);
 	const [requestValue, setRequestValue] = React.useState('{"action":"track.get","id":"12345"}');
 	const [isFullScreen, setIsFullScreen] = React.useState(window.innerHeight === screen.height);
+	const [isInvalidRequestData, setIsInvalidRequestData] = React.useState(false);
+
+	React.useEffect(() => {
+		const resizeButton = textAreaResizeButtonRef.current;
+		const leftTextArea = leftTextAreaBlockRef.current;
+		const rightTextArea = rightTextAreaBlockRef.current;
+
+		if (!resizeButton || !leftTextArea || !rightTextArea) {
+			return;
+		}
+
+		const resizeTextArea = ({ x }: MouseEvent) => {
+			if (x > 100 && x < window.innerWidth - 100) {
+				leftTextArea.style.width = `${x - 18}px`;
+				rightTextArea.style.width = `calc(100% - ${x}px)`;
+				resizeButton.style.left = `${x - 3}px`;
+			}
+		};
+
+		resizeButton.addEventListener('mousedown', () => {
+			document.addEventListener('mousemove', resizeTextArea, false);
+		}, false);
+
+		document.addEventListener('mouseup', () => {
+			document.removeEventListener('mousemove', resizeTextArea, false);
+		}, false);
+
+		return () => {
+			document.removeEventListener('mousemove', resizeTextArea, false);
+		};
+	}, []);
 
 	React.useEffect(() => {
 		const fullScreenDetect = () => {
@@ -247,8 +309,9 @@ const Console = ({
 
 		try {
 			requestData = JSON.parse(requestValue);
-		} catch (e) {
-			alert(e);
+			setIsInvalidRequestData(false);
+		} catch {
+			setIsInvalidRequestData(true);
 		}
 
 		if (requestData) {
@@ -260,10 +323,10 @@ const Console = ({
 	};
 
 	const onClickFullScreenButton = () => {
-		if (ref.current) {
+		if (consoleRef.current) {
 
 			if (!isFullScreen) {
-				ref.current.requestFullscreen();
+				consoleRef.current.requestFullscreen();
 				setIsFullScreen(true);
 			} else {
 				document.exitFullscreen();
@@ -273,7 +336,7 @@ const Console = ({
 	};
 
 	return (
-		<section ref={ref}>
+		<section ref={consoleRef}>
 			<Header>
 				<FlexCotainer>
 					<Logo />
@@ -288,26 +351,35 @@ const Console = ({
 			</Header>
 
 			<RequestHistory>
-				{requestHistoryList.map(request => (
+				{requestHistoryList?.map(request => (
 					<HistoryTrack key={`historyTrack_${request.id}`}>
 						<HistoryCodeStatus success={request.success} />
 						{request.action}
 						<HistoryButton />
 					</HistoryTrack>
 				))}
-				
-				{requestHistoryList.length ? <HistoryClearButton /> : null}
+
+				{requestHistoryList?.length ? <HistoryClearButton /> : null}
 			</RequestHistory>
 
 			<RequestContainer>
-				<TextAreaContainer>
-					<TextAreaLabel>Запрос:</TextAreaLabel>
-					<TextArea value={requestValue} onChange={onChangeRequestValue} />
+				<TextAreaContainer ref={leftTextAreaBlockRef}>
+					<TextAreaLabel isInvalid={isInvalidRequestData}>Запрос:</TextAreaLabel>
+					<TextArea
+						value={requestValue}
+						onChange={onChangeRequestValue}
+						isInvalid={isInvalidRequestData}
+					/>
 				</TextAreaContainer>
 
-				<TextAreaContainer>
-					<TextAreaLabel>Ответ:</TextAreaLabel>
-					<TextArea value={response || ''} readOnly />
+				<TextAreaResizeButton ref={textAreaResizeButtonRef} />
+				
+				<TextAreaContainer ref={rightTextAreaBlockRef}>
+					<TextAreaLabel isInvalid={isInvalidResponseData}>Ответ:</TextAreaLabel>
+					<TextArea
+						value={response || ''}
+						isInvalid={isInvalidResponseData}
+						readOnly />
 				</TextAreaContainer>
 			</RequestContainer>
 
@@ -326,7 +398,7 @@ interface IProps {
 	subLogin: string | null;
 	isRequestLoading: boolean;
 	response: string | null;
-	requestHistoryList: IHistoryTrack[];
+	requestHistoryList: IHistoryTrack[] | null;
 	onLogout: () => void;
 	onRequest: (data: IRequestData) => void;
 }
@@ -350,3 +422,9 @@ interface IHistoryTrack {
 interface IHistoryCodeStatusProps {
 	success: boolean;
 }
+
+interface ITextAreaProps {
+	isInvalid: boolean;
+}
+
+type TTextAreaLabelProps = ITextAreaProps;

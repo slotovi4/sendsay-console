@@ -4,7 +4,7 @@ import { ActionTypes } from 'src/store/constants';
 const initialState: IInitialState = {
 	loading: false,
 	response: null,
-	requestHistory: []
+	requestHistory: null
 };
 
 const isEquivalentPayload = (a: IHistoryRequest['payload'], b: IHistoryRequest['payload']) => {
@@ -36,21 +36,21 @@ export default {
 				};
 			},
 			[ActionTypes.REQUEST_IS_DONE]: (state, { payload }: Action<IHistoryRequest>): IInitialState => {
-				const equalRequest = state.requestHistory.find(e => isEquivalentPayload(e.payload, payload.payload));
+				const equalRequest = state.requestHistory?.find(e => isEquivalentPayload(e.payload, payload.payload));
 
 				if (!equalRequest) {
 					return {
 						...state,
 						loading: false,
 						response: payload.response,
-						requestHistory: [payload, ...state.requestHistory]
+						requestHistory: [payload, ...(state.requestHistory || [])]
 					};
 				} else {
 					return {
 						...state,
 						loading: false,
 						response: payload.response,
-						requestHistory: [equalRequest, ...(state.requestHistory.filter(e => e.id !== equalRequest.id))]
+						requestHistory: [equalRequest, ...(state.requestHistory?.filter(e => e.id !== equalRequest.id) || [])]
 					};
 				}
 			},
@@ -70,7 +70,7 @@ export interface IHistoryRequest {
 interface IInitialState {
 	loading: boolean;
 	response: string | null;
-	requestHistory: IHistoryRequest[];
+	requestHistory: IHistoryRequest[] | null;
 }
 
 type TCombinedPayloads = IHistoryRequest;
