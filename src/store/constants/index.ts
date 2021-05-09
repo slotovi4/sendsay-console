@@ -10,6 +10,7 @@ export const ActionTypes = keyMirror({
 	REQUEST: undefined,
 	REQUEST_IS_DONE: undefined,
 	REQUEST_DELETE: undefined,
+	REQUEST_CLEAR_HISTORY: undefined,
 	LOGOUT: undefined,
 	LOGOUT_SUCCESS: undefined,
 	LOGOUT_FAILURE: undefined,

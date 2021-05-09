@@ -132,6 +132,7 @@ const Console = ({
 	subLogin,
 	onRequest,
 	response,
+	onClearHistory,
 	isRequestLoading,
 	requestHistoryList,
 	onDeleteRequestHistory
@@ -188,7 +189,18 @@ const Console = ({
 	};
 
 	const onRunHistoryTrack = (request: IHistoryTrack) => () => {
-		onSendRequest({ action: request.action, id: request.id });
+		let requestData: IRequestData | null = null;
+
+		try {
+			requestData = JSON.parse(request.payload);
+		} catch {
+			console.log('error run');
+		}
+
+		if (requestData) {
+			setRequestValue(request.payload);
+			onSendRequest(requestData);
+		}
 	};
 
 	const onDeleteHistoryTrack = (trackId: IHistoryTrack['id']) => () => {
@@ -214,7 +226,7 @@ const Console = ({
 					/>
 				))}
 
-				{requestHistoryList?.length ? <HistoryClearButton /> : null}
+				{requestHistoryList?.length ? <HistoryClearButton title='Очистить историю' onClick={onClearHistory} /> : null}
 			</RequestHistory>
 
 			<RequestContainer>
@@ -244,6 +256,7 @@ interface IProps {
 	response: string | null;
 	requestHistoryList: IHistoryTrack[] | null;
 	onLogout: IHeaderProps['onLogout'];
+	onClearHistory: () => void;
 	onRequest: (data: IRequestData) => void;
 	onDeleteRequestHistory: (id: IHistoryTrack['id']) => void;
 }

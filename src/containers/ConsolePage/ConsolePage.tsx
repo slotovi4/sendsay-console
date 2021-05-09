@@ -3,7 +3,8 @@ import {
 	logout, 
 	authenticateCheck, 
 	request, 
-	requestDelete 
+	requestDelete,
+	requestClearHistory
 } from 'actions';
 import { useDispatch, useSelector } from 'react-redux';
 import { TRootState } from 'store';
@@ -32,6 +33,10 @@ const ConsolePage = () => {
 	const deleteRequest = (id: IHistoryRequest['id']) => {
 		dispatch(requestDelete(id));
 	};
+	
+	const onClearHistory = () => {
+		dispatch(requestClearHistory());
+	};
 
 	return (
 		<Console
@@ -42,6 +47,7 @@ const ConsolePage = () => {
 			response={response}
 			requestHistoryList={requestHistoryList}
 			onDeleteRequestHistory={deleteRequest}
+			onClearHistory={onClearHistory}
 		/>
 	);
 };

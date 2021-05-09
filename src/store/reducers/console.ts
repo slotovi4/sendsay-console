@@ -1,6 +1,10 @@
 import { handleActions, Action } from 'redux-actions';
 import { ActionTypes } from 'src/store/constants';
-import { saveHistoryRequestList, getRequestHistoryList } from '../localStore';
+import { 
+	saveHistoryRequestList, 
+	getRequestHistoryList, 
+	clearRequestHistoryList 
+} from '../localStore';
 
 const initialState: IInitialState = {
 	loading: false,
@@ -71,6 +75,14 @@ export default {
 				return {
 					...state,
 					requestHistoryList: newRequestHistoryList
+				};
+			},
+			[ActionTypes.REQUEST_CLEAR_HISTORY]: (state): IInitialState => {
+				clearRequestHistoryList();
+
+				return {
+					...state,
+					requestHistoryList: null
 				};
 			},
 		},

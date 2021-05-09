@@ -12,6 +12,9 @@ const Track = styled.div`
 	line-height: 20px;
 	transition: box-shadow 0.3s ease;
 	position: relative;
+	display: flex;
+    justify-content: center;
+    align-items: center;
 
 	&:hover {
 		box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.25);
@@ -30,6 +33,7 @@ const HistoryCodeStatus = styled.div<IHistoryCodeStatusProps>`
 const HistoryButton = styled(DotsButton)`
 	padding: 0 12px;
 	height: 20px;
+	cursor: pointer;
 `;
 
 const MenuBlock = styled.div`
@@ -52,6 +56,7 @@ const MenuButton = styled.span<IMenuButtonProps>`
 	padding: 10px 15px;
 	transition: background-color 0.3s ease, color 0.3s ease;
 	cursor: pointer;
+	user-select: none;
 
 	&:hover {
 		color: white;
@@ -169,8 +174,9 @@ const HistoryTrack = ({ request, onClick, onRun, onDelete }: IProps) => {
 			<TrackBody onClick={onClick}>
 				<HistoryCodeStatus success={request.success} />
 				{request.action}
-				<HistoryButton ref={settingsRef} onClick={onSettingsClick} />
 			</TrackBody>
+
+			<HistoryButton ref={settingsRef} onClick={onSettingsClick} />
 
 			{isShowMenu ? (
 				<MenuBlock ref={menuRef}>
