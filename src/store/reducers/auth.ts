@@ -16,7 +16,7 @@ export default {
 			[ActionTypes.AUTHENTICATE]: (state): IInitialState => {
 				return {
 					...state,
-					loading: false,
+					loading: true,
 				};
 			},
 			[ActionTypes.AUTHENTICATE_SUCCESS]: (state, { payload }: Action<ISendsaySuccess>): IInitialState => {

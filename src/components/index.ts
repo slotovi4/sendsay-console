@@ -7,3 +7,5 @@ export * from './Logo';
 export * from './DotsButton';
 export * from './RequestSection';
 export * from './HistoryTrack';
+export * from './Header';
+export * from './Icons';

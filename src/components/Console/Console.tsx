@@ -1,77 +1,14 @@
 import React from 'react';
 import {
-	Logo,
 	Button,
 	HistoryTrack,
-	RequestSection
+	RequestSection,
+	Header,
+	IHeaderProps
 } from 'components';
 import styled from 'styled-components';
-import logoutIcon from './logoutIcon.svg';
-import fullScreenIcon from './fullScreenIcon.svg';
 import formatIcon from './formatIcon.svg';
 import clearIcon from './clearIcon.svg';
-import exitScreenIcon from './exitScreenIcon.svg';
-
-const Header = styled.section`
-	padding: 10px 15px;
-	display: flex;
-	justify-content: space-between;
-	background: #F6F6F6;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-`;
-
-const Title = styled.span`
-	font-size: 20px;
-	line-height: 30px;
-	display: block;
-	margin-left: 20px;
-`;
-
-const SubLogin = styled.div`
-	border: 1px solid rgba(0, 0, 0, 0.2);
-	border-radius: 5px;
-	padding: 3px 15px;
-	font-size: 16px;
-	line-height: 20px;
-	margin-right: 30px;
-`;
-
-const SubLoginDots = styled.span`
-	color: rgba(0, 0, 0, 0.2);
-`;
-
-const FlexContainer = styled.div`
-	display: flex;
-	align-items: center;
-`;
-
-const LogoutButton = styled.button`
-	background: transparent;
-	border: none;
-	width: 82px;
-	font-size: 16px;
-	line-height: 24px;
-	position: relative;
-	text-align: left;
-	padding: 0;
-	cursor: pointer;
-
-	&::after {
-		content: '';
-		background: url(${logoutIcon});
-		width: 24px;
-		height: 24px;
-		position: absolute;
-		right: 0;
-	}
-`;
-
-const FullScreenButton = styled.div<IFullScreenButtonProps>`
-	background: url(${props => props.fullScreen ? exitScreenIcon : fullScreenIcon});
-	width: 20px;
-	height: 20px;
-	margin-left: 20px;
-`;
 
 const RequestHistory = styled.section`
 	padding: 10px 15px;
@@ -203,24 +140,7 @@ const Console = ({
 	const firstUpdate = React.useRef(true);
 	const isInvalidResponseData = Boolean(!firstUpdate.current && requestHistoryList && requestHistoryList.length ? !requestHistoryList[0].success : false);
 	const [requestValue, setRequestValue] = React.useState('');
-	const [isFullScreen, setIsFullScreen] = React.useState(window.innerHeight === screen.height);
 	const [isInvalidRequestData, setIsInvalidRequestData] = React.useState(false);
-
-	React.useEffect(() => {
-		const fullScreenDetect = () => {
-			if (document.fullscreenElement) {
-				setIsFullScreen(true);
-			} else {
-				setIsFullScreen(false);
-			}
-		};
-
-		document.addEventListener('fullscreenchange', fullScreenDetect);
-
-		return () => {
-			document.removeEventListener('fullscreenchange', fullScreenDetect);
-		};
-	}, []);
 
 	const onSendRequest = (request: IRequestData) => {
 		if (firstUpdate.current) {
@@ -263,19 +183,6 @@ const Console = ({
 		}
 	};
 
-	const onClickFullScreenButton = () => {
-		if (consoleRef.current) {
-
-			if (!isFullScreen) {
-				consoleRef.current.requestFullscreen();
-				setIsFullScreen(true);
-			} else {
-				document.exitFullscreen();
-				setIsFullScreen(false);
-			}
-		}
-	};
-
 	const onClickHistoryTrack = (request: IHistoryTrack) => () => {
 		setRequestValue(request.payload);
 	};
@@ -290,18 +197,11 @@ const Console = ({
 
 	return (
 		<section ref={consoleRef}>
-			<Header>
-				<FlexContainer>
-					<Logo />
-					<Title>API-консолька</Title>
-				</FlexContainer>
-
-				<FlexContainer>
-					<SubLogin>{subLogin} <SubLoginDots>:</SubLoginDots> sublogin</SubLogin>
-					<LogoutButton onClick={onLogout}>Выйти</LogoutButton>
-					<FullScreenButton fullScreen={isFullScreen} onClick={onClickFullScreenButton} />
-				</FlexContainer>
-			</Header>
+			<Header
+				subLogin={subLogin}
+				onLogout={onLogout}
+				parentRef={consoleRef}
+			/>
 
 			<RequestHistory>
 				{requestHistoryList?.map(request => (
@@ -339,17 +239,13 @@ const Console = ({
 export default React.memo(Console);
 
 interface IProps {
-	subLogin: string | null;
+	subLogin: IHeaderProps['subLogin'];
 	isRequestLoading: boolean;
 	response: string | null;
 	requestHistoryList: IHistoryTrack[] | null;
-	onLogout: () => void;
+	onLogout: IHeaderProps['onLogout'];
 	onRequest: (data: IRequestData) => void;
 	onDeleteRequestHistory: (id: IHistoryTrack['id']) => void;
-}
-
-interface IFullScreenButtonProps {
-	fullScreen: boolean;
 }
 
 interface IRequestData {
