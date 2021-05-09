@@ -1,6 +1,8 @@
 ### TS(react-scripts-ts), rematch, router, bem-react/classname, sass
 </br>
 
+<b>Задание - https://www.notion.so/API-a4174e966b0f4383a6bd22775ca09722</b>
+
 Запуск </br>
 `yarn` </br>
 `yarn start`</br>

@@ -4,3 +4,6 @@ export * from './Button';
 export * from './Console';
 export * from './ErrorBlock';
 export * from './Logo';
+export * from './DotsButton';
+export * from './RequestSection';
+export * from './HistoryTrack';

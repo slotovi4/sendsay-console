@@ -54,6 +54,12 @@ export default {
 					};
 				}
 			},
+			[ActionTypes.REQUEST_DELETE]: (state, { payload }: Action<IHistoryRequest['id']>): IInitialState => {
+				return {
+					...state,
+					requestHistory: [...(state.requestHistory?.filter(e => e.id !== payload) || [])]
+				};
+			},
 		},
 		initialState
 	),
@@ -64,7 +70,7 @@ export interface IHistoryRequest {
 	success: boolean;
 	response: string;
 	id: string;
-	readonly payload: {[key: string]: unknown};
+	readonly payload: { [key: string]: unknown };
 }
 
 interface IInitialState {
@@ -73,4 +79,4 @@ interface IInitialState {
 	requestHistory: IHistoryRequest[] | null;
 }
 
-type TCombinedPayloads = IHistoryRequest;
+type TCombinedPayloads = IHistoryRequest | IHistoryRequest['id'];

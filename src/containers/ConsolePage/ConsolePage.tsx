@@ -1,15 +1,21 @@
 import React, { useEffect } from 'react';
+import { 
+	logout, 
+	authenticateCheck, 
+	request, 
+	requestDelete 
+} from 'actions';
 import { useDispatch, useSelector } from 'react-redux';
 import { TRootState } from 'store';
 import { Console } from 'components';
-import { logout, authenticateCheck, request } from 'actions';
+import { IHistoryRequest } from 'reducers';
 
 const ConsolePage = () => {
 	const dispatch = useDispatch();
 	const subLogin = useSelector((state: TRootState) => state.auth.sublogin);
 	const isRequestLoading = useSelector((state: TRootState) => state.console.loading);
 	const response = useSelector((state: TRootState) => state.console.response);
-	const requestHistoryList = useSelector((state: TRootState) => state.console.requestHistory);
+	const requestHistoryList = useSelector((state: TRootState) => state.console.requestHistory?.map(e => ({...e, payload: JSON.stringify(e.payload)})) || null);
 
 	useEffect(() => {
 		dispatch(authenticateCheck());
@@ -23,6 +29,10 @@ const ConsolePage = () => {
 		dispatch(request(data));
 	};
 
+	const deleteRequest = (id: IHistoryRequest['id']) => {
+		dispatch(requestDelete(id));
+	};
+
 	return (
 		<Console
 			isRequestLoading={isRequestLoading}
@@ -31,6 +41,7 @@ const ConsolePage = () => {
 			onRequest={doRequest}
 			response={response}
 			requestHistoryList={requestHistoryList}
+			onDeleteRequestHistory={deleteRequest}
 		/>
 	);
 };
