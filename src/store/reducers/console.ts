@@ -1,10 +1,11 @@
 import { handleActions, Action } from 'redux-actions';
 import { ActionTypes } from 'src/store/constants';
+import { saveHistoryRequestList, getRequestHistoryList } from '../localStore';
 
 const initialState: IInitialState = {
 	loading: false,
 	response: null,
-	requestHistory: null
+	requestHistoryList: getRequestHistoryList(),
 };
 
 const isEquivalentPayload = (a: IHistoryRequest['payload'], b: IHistoryRequest['payload']) => {
@@ -36,28 +37,40 @@ export default {
 				};
 			},
 			[ActionTypes.REQUEST_IS_DONE]: (state, { payload }: Action<IHistoryRequest>): IInitialState => {
-				const equalRequest = state.requestHistory?.find(e => isEquivalentPayload(e.payload, payload.payload));
+				const equalRequest = state.requestHistoryList?.find(e => isEquivalentPayload(e.payload, payload.payload));
 
 				if (!equalRequest) {
+					const newRequestHistoryList = [payload, ...(state.requestHistoryList || [])];
+
+					saveHistoryRequestList(newRequestHistoryList);
+
 					return {
 						...state,
 						loading: false,
 						response: payload.response,
-						requestHistory: [payload, ...(state.requestHistory || [])]
+						requestHistoryList: newRequestHistoryList
 					};
 				} else {
+					const newRequestHistoryList = [equalRequest, ...(state.requestHistoryList?.filter(e => e.id !== equalRequest.id) || [])];
+
+					saveHistoryRequestList(newRequestHistoryList);
+
 					return {
 						...state,
 						loading: false,
 						response: payload.response,
-						requestHistory: [equalRequest, ...(state.requestHistory?.filter(e => e.id !== equalRequest.id) || [])]
+						requestHistoryList: newRequestHistoryList
 					};
 				}
 			},
 			[ActionTypes.REQUEST_DELETE]: (state, { payload }: Action<IHistoryRequest['id']>): IInitialState => {
+				const newRequestHistoryList = [...(state.requestHistoryList?.filter(e => e.id !== payload) || [])];
+
+				saveHistoryRequestList(newRequestHistoryList);
+
 				return {
 					...state,
-					requestHistory: [...(state.requestHistory?.filter(e => e.id !== payload) || [])]
+					requestHistoryList: newRequestHistoryList
 				};
 			},
 		},
@@ -76,7 +89,7 @@ export interface IHistoryRequest {
 interface IInitialState {
 	loading: boolean;
 	response: string | null;
-	requestHistory: IHistoryRequest[] | null;
+	requestHistoryList: IHistoryRequest[] | null;
 }
 
 type TCombinedPayloads = IHistoryRequest | IHistoryRequest['id'];

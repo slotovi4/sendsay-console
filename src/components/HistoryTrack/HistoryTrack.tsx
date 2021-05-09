@@ -41,12 +41,13 @@ const MenuBlock = styled.div`
 	top: 30px;
 	z-index: 1;
 	width: 100%;
+	min-width: 130px;
 	padding: 5px 0;
 `;
 
 const MenuButton = styled.span<IMenuButtonProps>`
 	display: block;
-	font-size: 14px;
+	font-size: 16px;
 	line-height: 20px;
 	padding: 10px 15px;
 	transition: background-color 0.3s ease, color 0.3s ease;
@@ -103,12 +104,18 @@ const CopyAlert = styled.div`
 
 const HistoryTrack = ({ request, onClick, onRun, onDelete }: IProps) => {
 	const menuRef = React.useRef<HTMLDivElement | null>(null);
+	const settingsRef = React.useRef<HTMLDivElement | null>(null);
 	const [isShowMenu, setIsShowMenu] = React.useState(false);
 	const [isShowCopyAlert, setIsShowCopyAlert] = React.useState(false);
 
 	React.useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
-			if (menuRef.current && !menuRef.current.contains(event.target as Node | null)) {
+			if(!menuRef.current || !settingsRef.current) {
+				return;
+			}
+
+			if (!menuRef.current.contains(event.target as Node | null) &&
+				!settingsRef.current.contains(event.target as Node | null)) {
 				setIsShowMenu(false);
 			}
 		};
@@ -123,21 +130,21 @@ const HistoryTrack = ({ request, onClick, onRun, onDelete }: IProps) => {
 	React.useEffect(() => {
 		let timeout: NodeJS.Timeout | null = null;
 
-		if(isShowCopyAlert) {
+		if (isShowCopyAlert) {
 			timeout = setTimeout(() => {
 				setIsShowCopyAlert(false);
 			}, copyAlertDuration * 1000);
 		}
 
 		return () => {
-			if(timeout !== null) {
+			if (timeout !== null) {
 				clearTimeout(timeout);
 			}
 		};
 	}, [isShowCopyAlert]);
 
 	const onSettingsClick = () => {
-		setIsShowMenu(prevShow => !prevShow);
+		setIsShowMenu((prevShow => !prevShow));
 	};
 
 	const onCopy = () => {
@@ -162,7 +169,7 @@ const HistoryTrack = ({ request, onClick, onRun, onDelete }: IProps) => {
 			<TrackBody onClick={onClick}>
 				<HistoryCodeStatus success={request.success} />
 				{request.action}
-				<HistoryButton onClick={onSettingsClick} />
+				<HistoryButton ref={settingsRef} onClick={onSettingsClick} />
 			</TrackBody>
 
 			{isShowMenu ? (

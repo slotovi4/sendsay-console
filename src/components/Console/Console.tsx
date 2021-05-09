@@ -80,6 +80,34 @@ const RequestHistory = styled.section`
 	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 	position: relative;
 	height: 51px;
+	// overflow-y: hidden;
+	// overflow-x: auto;
+
+	// overflow-y: auto;
+	// overflow-x: hidden;
+	// transform: rotate(-90deg) translateY(-100px);
+	// transform-origin: right top;
+	// & > div {
+	// 	display: block;
+	// 	transform: rotate(90deg);
+	// 	transform-origin: right top;
+	// }
+
+	// display: flex;
+	// flex-wrap: nowrap;
+	// overflow-x: auto;
+
+	// & div > {
+	// 	flex: 0 0 auto;
+	// }
+
+	// overflow-x: scroll;
+	// overflow-y: hidden;
+	// white-space: nowrap;
+
+	// & div > {
+	// 	display: inline-block;
+	// }
 `;
 
 const HistoryClearButton = styled.button`
@@ -89,15 +117,13 @@ const HistoryClearButton = styled.button`
 	position: absolute;
 	width: 51px;
 	height: 100%;
-	background: url(${clearIcon});
-	background-repeat: no-repeat;
-    background-position: center;
 	border-left: 1px solid #C4C4C4;
 	right: 0;
 	top: 0;
 	cursor: pointer;
+	background: #F6F6F6;
 
-	&::after {
+	&::before {
 		content: '';
 		position: absolute;
 		background: linear-gradient(269.93deg, #F6F6F6 0.06%, rgba(246, 246, 246, 0) 99.93%);
@@ -105,6 +131,18 @@ const HistoryClearButton = styled.button`
 		height: 100%;
 		top:0;
 		left: -16px;
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		background: url(${clearIcon});
+		background-repeat: no-repeat;
+		background-position: center;
+		width: 100%;
+		height: 100%;
+		left: 0;
+		top: 0;
 	}
 `;
 
@@ -162,8 +200,9 @@ const Console = ({
 	onDeleteRequestHistory
 }: IProps) => {
 	const consoleRef = React.useRef<HTMLElement | null>(null);
-	const isInvalidResponseData = Boolean(requestHistoryList && requestHistoryList.length ? !requestHistoryList[0].success : false);
-	const [requestValue, setRequestValue] = React.useState('{"action":"track.get","id":"12345"}');
+	const firstUpdate = React.useRef(true);
+	const isInvalidResponseData = Boolean(!firstUpdate.current && requestHistoryList && requestHistoryList.length ? !requestHistoryList[0].success : false);
+	const [requestValue, setRequestValue] = React.useState('');
 	const [isFullScreen, setIsFullScreen] = React.useState(window.innerHeight === screen.height);
 	const [isInvalidRequestData, setIsInvalidRequestData] = React.useState(false);
 
@@ -183,12 +222,27 @@ const Console = ({
 		};
 	}, []);
 
+	const onSendRequest = (request: IRequestData) => {
+		if (firstUpdate.current) {
+			firstUpdate.current = false;
+		}
+
+		onRequest(request);
+	};
+
 	const onChangeRequestValue = (event: React.ChangeEvent<HTMLTextAreaElement> | undefined) => {
 		const value = event?.target.value;
 
 		if (value !== undefined) {
 			setRequestValue(value);
 		}
+	};
+
+	const onFormatRequest = () => {
+		const requestData = JSON.parse(requestValue);
+		const prettyRequestData = JSON.stringify(requestData, undefined, 4);
+
+		setRequestValue(prettyRequestData);
 	};
 
 	const onSubmit = () => {
@@ -202,7 +256,7 @@ const Console = ({
 		}
 
 		if (requestData) {
-			onRequest({
+			onSendRequest({
 				action: requestData.action || '',
 				id: requestData.id || undefined
 			});
@@ -227,8 +281,8 @@ const Console = ({
 	};
 
 	const onRunHistoryTrack = (request: IHistoryTrack) => () => {
-		onRequest(request);
-	}; 
+		onSendRequest({ action: request.action, id: request.id });
+	};
 
 	const onDeleteHistoryTrack = (trackId: IHistoryTrack['id']) => () => {
 		onDeleteRequestHistory(trackId);
@@ -276,7 +330,7 @@ const Console = ({
 			<Footer>
 				<Button onClick={onSubmit} isLoading={isRequestLoading} type='button'>Отправить</Button>
 				<FooterLink href='#'>@link-to-your-github</FooterLink>
-				<FormatButton>Форматировать</FormatButton>
+				<FormatButton onClick={onFormatRequest}>Форматировать</FormatButton>
 			</Footer>
 		</section>
 	);
