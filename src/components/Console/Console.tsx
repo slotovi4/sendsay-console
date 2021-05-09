@@ -1,13 +1,12 @@
 import React from 'react';
 import {
-	Button,
 	HistoryTrack,
 	RequestSection,
 	Header,
-	IHeaderProps
+	IHeaderProps,
+	Footer
 } from 'components';
 import styled from 'styled-components';
-import formatIcon from './formatIcon.svg';
 import clearIcon from './clearIcon.svg';
 
 const RequestHistory = styled.section`
@@ -90,43 +89,6 @@ const RequestContainer = styled.section`
 	position: relative;
 `;
 
-
-const Footer = styled.footer`
-	background: #FFFFFF;
-	padding: 15px;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-`;
-
-const FooterLink = styled.a`
-	color: #999999;
-	font-size: 16px;
-	line-height: 20px;
-	text-decoration: none;
-`;
-
-const FormatButton = styled.button`
-	font-size: 16px;
-	line-height: 20px;
-	background: transparent;
-	padding: 0;
-	border: none;
-	position: relative;
-	width: 158px;
-	text-align: right;
-
-	&::after {
-		content: '';
-		background: url(${formatIcon});
-		width: 24px;
-		height: 24px;
-		position: absolute;
-		left: 0;
-		top: -3px;
-	}
-`;
-
 const Console = ({
 	onLogout,
 	subLogin,
@@ -159,24 +121,37 @@ const Console = ({
 		}
 	};
 
-	const onFormatRequest = () => {
-		const requestData = JSON.parse(requestValue);
-		const prettyRequestData = JSON.stringify(requestData, undefined, 4);
+	const parseRequestValue = () => {
+		let requestData: { [key: string]: string } | null = null;
 
-		setRequestValue(prettyRequestData);
+		if (requestValue) {
+			try {
+				requestData = JSON.parse(requestValue);
+				setIsInvalidRequestData(false);
+			} catch {
+				setIsInvalidRequestData(true);
+			}
+		} else {
+			setIsInvalidRequestData(false);
+		}
+
+		return requestData;
+	};
+
+	const onFormatRequest = () => {
+		const requestData = parseRequestValue();
+
+		if (requestData !== null) {
+			const prettyRequestData = JSON.stringify(requestData, undefined, 4);
+
+			setRequestValue(prettyRequestData);
+		}
 	};
 
 	const onSubmit = () => {
-		let requestData = null;
+		const requestData = parseRequestValue();
 
-		try {
-			requestData = JSON.parse(requestValue);
-			setIsInvalidRequestData(false);
-		} catch {
-			setIsInvalidRequestData(true);
-		}
-
-		if (requestData) {
+		if (requestData !== null) {
 			onSendRequest({
 				action: requestData.action || '',
 				id: requestData.id || undefined
@@ -239,11 +214,11 @@ const Console = ({
 				/>
 			</RequestContainer>
 
-			<Footer>
-				<Button onClick={onSubmit} isLoading={isRequestLoading} type='button'>Отправить</Button>
-				<FooterLink href='#'>@link-to-your-github</FooterLink>
-				<FormatButton onClick={onFormatRequest}>Форматировать</FormatButton>
-			</Footer>
+			<Footer
+				onSubmit={onSubmit}
+				isRequestLoading={isRequestLoading}
+				onFormatRequest={onFormatRequest}
+			/>
 		</section>
 	);
 };

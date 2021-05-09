@@ -9,3 +9,4 @@ export * from './RequestSection';
 export * from './HistoryTrack';
 export * from './Header';
 export * from './Icons';
+export * from './Footer';

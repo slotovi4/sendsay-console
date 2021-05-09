@@ -1,4 +1,5 @@
 import React from 'react';
+import IconHOC from './IconHOC';
 
 const FullScreenIcon = (props: React.SVGProps<SVGSVGElement>) => {
 	return (
@@ -8,4 +9,4 @@ const FullScreenIcon = (props: React.SVGProps<SVGSVGElement>) => {
 	);
 };
 
-export default React.memo(FullScreenIcon);
+export default React.memo(IconHOC(FullScreenIcon));

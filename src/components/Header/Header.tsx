@@ -42,10 +42,6 @@ const FullScreenButtonContainer = styled.div`
 	height: 20px;
 	position: relative;
 
-	& svg, & path {
-		outline: none;
-	}
-
 	&:focus::before {
 		content: '';
 		position: absolute;

@@ -1,4 +1,5 @@
 import React from 'react';
+import IconHOC from './IconHOC';
 
 const ExitScreenIcon = (props: React.SVGProps<SVGSVGElement>) => {
 	return (
@@ -8,4 +9,4 @@ const ExitScreenIcon = (props: React.SVGProps<SVGSVGElement>) => {
 	);
 };
 
-export default React.memo(ExitScreenIcon);
+export default React.memo(IconHOC(ExitScreenIcon));
