@@ -36,11 +36,14 @@ const SubLoginDots = styled.span`
 	color: rgba(0, 0, 0, 0.2);
 `;
 
-const FullScreenButtonContainer = styled.div`
+const FullScreenButton = styled.button`
 	margin-left: 30px;
 	cursor: pointer;
 	height: 20px;
 	position: relative;
+	border: none;
+    background: transparent;
+	padding: 0;
 
 	&:focus::before {
 		content: '';
@@ -121,9 +124,9 @@ const Header = ({ subLogin, onLogout, parentRef }: IProps) => {
 			<FlexContainer>
 				<SubLogin>{subLogin} <SubLoginDots>:</SubLoginDots> sublogin</SubLogin>
 				<LogoutButton onClick={onLogout}>Выйти</LogoutButton>
-				<FullScreenButtonContainer onClick={onClickFullScreenButton}>
+				<FullScreenButton onClick={onClickFullScreenButton}>
 					{!isFullScreen ? <FullScreenIcon /> : <ExitScreenIcon />}
-				</FullScreenButtonContainer>
+				</FullScreenButton>
 			</FlexContainer>
 		</HeaderContainer>
 	);
