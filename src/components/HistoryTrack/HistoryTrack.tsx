@@ -1,6 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import { DotsButton } from 'components';
+import { 
+	DotsButton, 
+	HistoryTrackMenu, 
+	THistoryTrackMenuButtonType 
+} from 'components';
 
 const Track = styled.div`
 	height: 30px;
@@ -34,42 +38,6 @@ const HistoryButton = styled(DotsButton)`
 	padding: 0 12px;
 	height: 20px;
 	cursor: pointer;
-`;
-
-const MenuBlock = styled.div`
-	background: #FFFFFF;
-	box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.25);
-	border-radius: 3px;
-	position: absolute;
-	left: 0;
-	top: 30px;
-	z-index: 1;
-	width: 100%;
-	min-width: 130px;
-	padding: 5px 0;
-`;
-
-const MenuButton = styled.span<IMenuButtonProps>`
-	display: block;
-	font-size: 16px;
-	line-height: 20px;
-	padding: 10px 15px;
-	transition: background-color 0.3s ease, color 0.3s ease;
-	cursor: pointer;
-	user-select: none;
-
-	&:hover {
-		color: white;
-		background-color: ${props => props.destruct ? '#CF2C00' : '#0055FB'};
-	}
-`;
-
-const MenuLine = styled.hr`
-	height: 1px;
-	width: 100%;
-	background: rgba(0,0,0,0.2);
-	border: none;
-	margin: 5px 0;
 `;
 
 const TrackBody = styled.div`
@@ -108,29 +76,9 @@ const CopyAlert = styled.div`
 `;
 
 const HistoryTrack = ({ request, onClick, onRun, onDelete }: IProps) => {
-	const menuRef = React.useRef<HTMLDivElement | null>(null);
-	const settingsRef = React.useRef<HTMLDivElement | null>(null);
+	const trackRef = React.useRef<HTMLDivElement | null>(null);
 	const [isShowMenu, setIsShowMenu] = React.useState(false);
 	const [isShowCopyAlert, setIsShowCopyAlert] = React.useState(false);
-
-	React.useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if(!menuRef.current || !settingsRef.current) {
-				return;
-			}
-
-			if (!menuRef.current.contains(event.target as Node | null) &&
-				!settingsRef.current.contains(event.target as Node | null)) {
-				setIsShowMenu(false);
-			}
-		};
-
-		document.addEventListener('mousedown', handleClickOutside);
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, []);
 
 	React.useEffect(() => {
 		let timeout: NodeJS.Timeout | null = null;
@@ -164,33 +112,48 @@ const HistoryTrack = ({ request, onClick, onRun, onDelete }: IProps) => {
 		setIsShowCopyAlert(true);
 	};
 
-	const onButtonClick = (callBack: () => void) => () => {
+	const onButtonClick = (buttonType: THistoryTrackMenuButtonType) => () => {
 		setIsShowMenu(false);
-		callBack();
+
+		switch(buttonType) {
+			case 'copy':
+				onCopy();
+				break;
+			case 'run':
+				onRun();
+				break;
+			case 'delete':
+				onDelete();
+			default:
+				break;
+		}
+	};
+
+	const hideMenu = () => {
+		setIsShowMenu(false);
 	};
 
 	return (
-		<Track>
-			<TrackBody onClick={onClick}>
-				<HistoryCodeStatus success={request.success} />
-				{request.action}
-			</TrackBody>
+		<>
+			<Track ref={trackRef}>
+				<TrackBody onClick={onClick}>
+					<HistoryCodeStatus success={request.success} />
+					{request.action}
+				</TrackBody>
 
-			<HistoryButton ref={settingsRef} onClick={onSettingsClick} />
+				<HistoryButton onClick={onSettingsClick} />
 
-			{isShowMenu ? (
-				<MenuBlock ref={menuRef}>
-					<MenuButton onClick={onButtonClick(onRun)}>Выполнить</MenuButton>
-					<MenuButton onClick={onButtonClick(onCopy)}>Скопировать</MenuButton>
-					<MenuLine />
-					<MenuButton onClick={onButtonClick(onDelete)} destruct>Удалить</MenuButton>
-				</MenuBlock>
-			) : null}
-
-			{isShowCopyAlert ? (
-				<CopyAlert>Скопировано</CopyAlert>
-			) : null}
-		</Track>
+				{isShowCopyAlert ? (
+					<CopyAlert>Скопировано</CopyAlert>
+				) : null}
+			</Track>
+			<HistoryTrackMenu
+				show={isShowMenu}
+				parentRef={trackRef}
+				onButtonClick={onButtonClick}
+				hideMenu={hideMenu}
+			/>
+		</>
 	);
 };
 
@@ -211,8 +174,4 @@ interface IRequestData {
 	action: string;
 	success: boolean;
 	payload: string;
-}
-
-interface IMenuButtonProps {
-	destruct?: boolean;
 }
