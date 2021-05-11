@@ -4,7 +4,9 @@ import {
 	RequestSection,
 	Header,
 	IHeaderProps,
-	Footer
+	Footer,
+	getPrettyRequestData,
+	parseRequestValue
 } from 'components';
 import styled from 'styled-components';
 import clearIcon from './clearIcon.svg';
@@ -100,17 +102,42 @@ const Console = ({
 	onDeleteRequestHistory
 }: IProps) => {
 	const consoleRef = React.useRef<HTMLElement | null>(null);
-	const firstUpdate = React.useRef(true);
-	const isInvalidResponseData = Boolean(!firstUpdate.current && requestHistoryList && requestHistoryList.length ? !requestHistoryList[0].success : false);
 	const [requestValue, setRequestValue] = React.useState('');
+	const [responseValue, setResponseValue] = React.useState('');
+	const [isInvalidResponseData, setIsInvalidResponseData] = React.useState(false);
 	const [isInvalidRequestData, setIsInvalidRequestData] = React.useState(false);
 
-	const onSendRequest = (request: IRequestData) => {
-		if (firstUpdate.current) {
-			firstUpdate.current = false;
+	React.useEffect(() => {
+		if(response === null || response === '') {
+			return;
 		}
 
-		onRequest(request);
+		const responseJsonData = parseRequestValue({
+			value: response,
+			setIsInvalid: setIsInvalidResponseData
+		});
+
+		if (responseJsonData !== null) {
+			setResponseValue(getPrettyRequestData(responseJsonData));
+		} else {
+			setResponseValue('');
+		}
+
+		setIsInvalidResponseData(Boolean(requestHistoryList && !requestHistoryList[0].success));
+	}, [response]);
+
+	const sendRequest = (value: string) => {
+		const requestJsonData = parseRequestValue({
+			value,
+			setIsInvalid: setIsInvalidRequestData
+		});
+
+		if (requestJsonData !== null) {
+			onRequest({
+				action: requestJsonData.action || '',
+				id: requestJsonData.id || undefined
+			});
+		}
 	};
 
 	const onChangeRequestValue = (event: React.ChangeEvent<HTMLTextAreaElement> | undefined) => {
@@ -121,61 +148,30 @@ const Console = ({
 		}
 	};
 
-	const parseRequestValue = () => {
-		let requestData: { [key: string]: string } | null = null;
-
-		if (requestValue) {
-			try {
-				requestData = JSON.parse(requestValue);
-				setIsInvalidRequestData(false);
-			} catch {
-				setIsInvalidRequestData(true);
-			}
-		} else {
-			setIsInvalidRequestData(false);
-		}
-
-		return requestData;
-	};
-
 	const onFormatRequest = () => {
-		const requestData = parseRequestValue();
+		const requestJsonData = parseRequestValue({
+			value: requestValue,
+			setIsInvalid: setIsInvalidRequestData
+		});
 
-		if (requestData !== null) {
-			const prettyRequestData = JSON.stringify(requestData, undefined, 4);
+		if (requestJsonData !== null) {
+			const prettyRequestValue = getPrettyRequestData(requestJsonData);
 
-			setRequestValue(prettyRequestData);
+			setRequestValue(prettyRequestValue);
 		}
 	};
 
 	const onSubmit = () => {
-		const requestData = parseRequestValue();
+		sendRequest(requestValue);
+	};
 
-		if (requestData !== null) {
-			onSendRequest({
-				action: requestData.action || '',
-				id: requestData.id || undefined
-			});
-		}
+	const onRunHistoryTrack = (request: IHistoryTrack) => () => {
+		setRequestValue(request.payload);
+		sendRequest(request.payload);
 	};
 
 	const onClickHistoryTrack = (request: IHistoryTrack) => () => {
 		setRequestValue(request.payload);
-	};
-
-	const onRunHistoryTrack = (request: IHistoryTrack) => () => {
-		let requestData: IRequestData | null = null;
-
-		try {
-			requestData = JSON.parse(request.payload);
-		} catch {
-			console.log('error run');
-		}
-
-		if (requestData) {
-			setRequestValue(request.payload);
-			onSendRequest(requestData);
-		}
 	};
 
 	const onDeleteHistoryTrack = (trackId: IHistoryTrack['id']) => () => {
@@ -210,7 +206,7 @@ const Console = ({
 					isInvalidResponseData={isInvalidResponseData}
 					onChangeRequestValue={onChangeRequestValue}
 					requestValue={requestValue}
-					responseValue={response || ''}
+					responseValue={responseValue}
 				/>
 			</RequestContainer>
 

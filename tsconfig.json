@@ -19,7 +19,7 @@
 		"noImplicitAny": true,
 		"strictNullChecks": true,
 		"suppressImplicitAnyIndexErrors": true,
-		"noUnusedLocals": false, // !!
+		"noUnusedLocals": true,
 		"allowSyntheticDefaultImports": true,
 		"paths": {
 			"components": [

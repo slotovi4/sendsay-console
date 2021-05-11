@@ -42,33 +42,25 @@ export default {
 			},
 			[ActionTypes.REQUEST_IS_DONE]: (state, { payload }: Action<IHistoryRequest>): IInitialState => {
 				const equalRequest = state.requestHistoryList?.find(e => isEquivalentPayload(e.payload, payload.payload));
+				let newRequestHistoryList: IHistoryRequest[] = [];
 
-				if (!equalRequest) {
-					const newRequestHistoryList = [payload, ...(state.requestHistoryList || [])];
-
-					saveHistoryRequestList(newRequestHistoryList);
-
-					return {
-						...state,
-						loading: false,
-						response: payload.response,
-						requestHistoryList: newRequestHistoryList
-					};
+				if(!equalRequest) {
+					newRequestHistoryList = [payload, ...(state.requestHistoryList || [])];
 				} else {
-					const newRequestHistoryList = [equalRequest, ...(state.requestHistoryList?.filter(e => e.id !== equalRequest.id) || [])];
-
-					saveHistoryRequestList(newRequestHistoryList);
-
-					return {
-						...state,
-						loading: false,
-						response: payload.response,
-						requestHistoryList: newRequestHistoryList
-					};
+					newRequestHistoryList = [equalRequest, ...(state.requestHistoryList?.filter(request => request.id !== equalRequest.id) || [])];
 				}
+
+				saveHistoryRequestList(newRequestHistoryList);
+
+				return {
+					...state,
+					loading: false,
+					response: payload.response,
+					requestHistoryList: newRequestHistoryList
+				};
 			},
-			[ActionTypes.REQUEST_DELETE]: (state, { payload }: Action<IHistoryRequest['id']>): IInitialState => {
-				const newRequestHistoryList = [...(state.requestHistoryList?.filter(e => e.id !== payload) || [])];
+			[ActionTypes.REQUEST_DELETE]: (state, { payload: deletedRequestId }: Action<IHistoryRequest['id']>): IInitialState => {
+				const newRequestHistoryList = state.requestHistoryList?.filter(request => request.id !== deletedRequestId) || [];
 
 				saveHistoryRequestList(newRequestHistoryList);
 

@@ -1,5 +1,5 @@
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import { persistStore, persistReducer } from 'redux-persist';
+import { persistReducer } from 'redux-persist';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { authReducer, consoleReducer } from 'src/store/reducers';
 import createSagaMiddleware from 'redux-saga';
