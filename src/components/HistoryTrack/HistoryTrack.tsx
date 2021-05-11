@@ -17,8 +17,8 @@ const Track = styled.div`
 	transition: box-shadow 0.3s ease;
 	position: relative;
 	display: flex;
-    justify-content: center;
-    align-items: center;
+	justify-content: center;
+	align-items: center;
 
 	&:hover {
 		box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.25);
@@ -103,7 +103,7 @@ const HistoryTrack = ({ request, onClick, onRun, onDelete }: IProps) => {
 	const onCopy = () => {
 		const el = document.createElement('textarea');
 
-		el.value = request.payload;
+		el.value = request.requestData;
 		document.body.appendChild(el);
 		el.select();
 		document.execCommand('copy');
@@ -173,5 +173,5 @@ interface IHistoryCodeStatusProps {
 interface IRequestData {
 	action: string;
 	success: boolean;
-	payload: string;
+	requestData: string;
 }

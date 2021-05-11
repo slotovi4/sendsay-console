@@ -6,31 +6,31 @@ import api from 'src/helpers/sendsay';
 const createUniqueId = (data: string) => data.split('').sort().join('');
 
 export function* sagaRequest({ payload }: IRequestSagaProps) {
-	let response: string | null = null;
+	let responseData: string | null = null;
 	let success = false;
 
 	try {
 		yield api.sendsay.request({
 			action: payload.action,
 			id: payload.id
-		}).then((e: unknown) => {
-			response = JSON.stringify(e);
+		}).then((response: unknown) => {
+			responseData = JSON.stringify(response);
 			success = true;
 		});
 	} catch (error) {
-		response = JSON.stringify(error);
+		responseData = JSON.stringify(error);
 		success = false;
 	}
 
-	const objectForId = `${JSON.stringify(payload)}${response}`;
+	if (responseData) {
+		const requestData = JSON.stringify(payload);
 
-	if (response) {
 		yield put(requestSuccess({
-			response,
 			success,
 			action: payload.action,
-			payload: { ...payload },
-			id: createUniqueId(objectForId)
+			responseData,
+			requestData,
+			id: createUniqueId(requestData)
 		}));
 	}
 }

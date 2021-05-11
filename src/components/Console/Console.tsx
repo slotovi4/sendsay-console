@@ -11,53 +11,35 @@ import {
 import styled from 'styled-components';
 import clearIcon from './clearIcon.svg';
 
+const RequestHistoryScrollContainer = styled.section`
+	overflow-x: auto;
+
+	::-webkit-scrollbar {
+		display: none;
+	}
+`;
+
 const RequestHistory = styled.section`
-	padding: 10px 15px;
+	padding: 10px 60px 10px 15px;
 	display: flex;
 	background: #F6F6F6;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 	position: relative;
 	height: 51px;
-	// overflow-y: hidden;
-	// overflow-x: auto;
-
-	// overflow-y: auto;
-	// overflow-x: hidden;
-	// transform: rotate(-90deg) translateY(-100px);
-	// transform-origin: right top;
-	// & > div {
-	// 	display: block;
-	// 	transform: rotate(90deg);
-	// 	transform-origin: right top;
-	// }
-
-	// display: flex;
-	// flex-wrap: nowrap;
-	// overflow-x: auto;
-
-	// & div > {
-	// 	flex: 0 0 auto;
-	// }
-
-	// overflow-x: scroll;
-	// overflow-y: hidden;
-	// white-space: nowrap;
-
-	// & div > {
-	// 	display: inline-block;
-	// }
+	float: left;
+	min-width: 100%;
 `;
 
 const HistoryClearButton = styled.button`
 	background: transparent;
 	padding: 0;
 	border: none;
-	position: absolute;
-	width: 51px;
-	height: 100%;
+	position: fixed;
+	width: 50px;
+	height: 50px;
 	border-left: 1px solid #C4C4C4;
 	right: 0;
-	top: 0;
+	top: 51px;
 	cursor: pointer;
 	background: #F6F6F6;
 
@@ -108,7 +90,7 @@ const Console = ({
 	const [isInvalidRequestData, setIsInvalidRequestData] = React.useState(false);
 
 	React.useEffect(() => {
-		if(response === null || response === '') {
+		if (response === null || response === '') {
 			return;
 		}
 
@@ -166,16 +148,28 @@ const Console = ({
 	};
 
 	const onRunHistoryTrack = (request: IHistoryTrack) => () => {
-		setRequestValue(request.payload);
-		sendRequest(request.payload);
+		setRequestValue(request.requestData);
+		sendRequest(request.requestData);
 	};
 
 	const onClickHistoryTrack = (request: IHistoryTrack) => () => {
-		setRequestValue(request.payload);
+		setRequestValue(request.requestData);
 	};
 
 	const onDeleteHistoryTrack = (trackId: IHistoryTrack['id']) => () => {
-		onDeleteRequestHistory(trackId);
+		const isDelete = confirm('Удалить запрос?');
+
+		if (isDelete) {
+			onDeleteRequestHistory(trackId);
+		}
+	};
+
+	const onClearTrackHistory = () => {
+		const isClear = confirm('Очистить историю?');
+
+		if (isClear) {
+			onClearHistory();
+		}
 	};
 
 	return (
@@ -186,19 +180,21 @@ const Console = ({
 				parentRef={consoleRef}
 			/>
 
-			<RequestHistory>
-				{requestHistoryList?.map(request => (
-					<HistoryTrack
-						key={`historyTrack_${request.id}`}
-						request={request}
-						onClick={onClickHistoryTrack(request)}
-						onRun={onRunHistoryTrack(request)}
-						onDelete={onDeleteHistoryTrack(request.id)}
-					/>
-				))}
+			<RequestHistoryScrollContainer>
+				<RequestHistory>
+					{requestHistoryList?.map(request => (
+						<HistoryTrack
+							key={`historyTrack_${request.id}`}
+							request={request}
+							onClick={onClickHistoryTrack(request)}
+							onRun={onRunHistoryTrack(request)}
+							onDelete={onDeleteHistoryTrack(request.id)}
+						/>
+					))}
 
-				{requestHistoryList?.length ? <HistoryClearButton title='Очистить историю' onClick={onClearHistory} /> : null}
-			</RequestHistory>
+					{requestHistoryList?.length ? <HistoryClearButton title='Очистить историю' onClick={onClearTrackHistory} /> : null}
+				</RequestHistory>
+			</RequestHistoryScrollContainer>
 
 			<RequestContainer>
 				<RequestSection
@@ -239,8 +235,7 @@ interface IRequestData {
 
 interface IHistoryTrack {
 	success: boolean;
-	payload: string;
-	response: string;
+	requestData: string;
 	action: string;
 	id: string;
 }

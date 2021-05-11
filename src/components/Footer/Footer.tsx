@@ -54,7 +54,7 @@ const Footer = ({ isRequestLoading, onFormatRequest, onSubmit }: IProps) => {
 	return (
 		<FooterContainer>
 			<Button onClick={onSubmit} isLoading={isRequestLoading} type='button'>Отправить</Button>
-			<FooterLink href='#'>@link-to-your-github</FooterLink>
+			<FooterLink href='https://github.com/slotovi4' target='__blank'>@slotovi4</FooterLink>
 			<FormatButton onClick={onFormatRequest}>
 				<FormatIcon />
 				Форматировать

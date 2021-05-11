@@ -8,8 +8,6 @@ const LoginPage = () => {
 	const dispatch = useDispatch();
 	const isLoading = useSelector((state: TRootState) => state.auth.loading);
 	const loginError = useSelector((state: TRootState) => state.auth.error);
-	
-	console.log('loading', isLoading);
 
 	const doLogin: ILoginProps['onLogin'] = (loginData) => {
 		dispatch(authenticate(loginData));

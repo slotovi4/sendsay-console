@@ -16,7 +16,7 @@ const ConsolePage = () => {
 	const subLogin = useSelector((state: TRootState) => state.auth.sublogin);
 	const isRequestLoading = useSelector((state: TRootState) => state.console.loading);
 	const response = useSelector((state: TRootState) => state.console.response);
-	const requestHistoryList = useSelector((state: TRootState) => state.console.requestHistoryList?.map(e => ({...e, payload: JSON.stringify(e.payload)})) || null);
+	const requestHistoryList = useSelector((state: TRootState) => state.console.requestHistoryList);
 
 	useEffect(() => {
 		dispatch(authenticateCheck());

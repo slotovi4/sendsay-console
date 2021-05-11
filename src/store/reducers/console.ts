@@ -12,25 +12,6 @@ const initialState: IInitialState = {
 	requestHistoryList: getRequestHistoryList(),
 };
 
-const isEquivalentPayload = (a: IHistoryRequest['payload'], b: IHistoryRequest['payload']) => {
-	const aPropsList = Object.getOwnPropertyNames(a);
-	const bPropsList = Object.getOwnPropertyNames(b);
-
-	if (aPropsList.length !== bPropsList.length) {
-		return false;
-	}
-
-	for (let i = 0; i < aPropsList.length; i++) {
-		const propName = aPropsList[i];
-
-		if (a[propName] !== b[propName]) {
-			return false;
-		}
-	}
-
-	return true;
-};
-
 export default {
 	console: handleActions<IInitialState, TCombinedPayloads>(
 		{
@@ -41,7 +22,7 @@ export default {
 				};
 			},
 			[ActionTypes.REQUEST_IS_DONE]: (state, { payload }: Action<IHistoryRequest>): IInitialState => {
-				const equalRequest = state.requestHistoryList?.find(e => isEquivalentPayload(e.payload, payload.payload));
+				const equalRequest = state.requestHistoryList?.find(request => request.id === payload.id);
 				let newRequestHistoryList: IHistoryRequest[] = [];
 
 				if(!equalRequest) {
@@ -55,7 +36,7 @@ export default {
 				return {
 					...state,
 					loading: false,
-					response: payload.response,
+					response: payload.responseData,
 					requestHistoryList: newRequestHistoryList
 				};
 			},
@@ -85,9 +66,9 @@ export default {
 export interface IHistoryRequest {
 	action: string;
 	success: boolean;
-	response: string;
 	id: string;
-	readonly payload: { [key: string]: unknown };
+	responseData: string;
+	requestData: string;
 }
 
 interface IInitialState {

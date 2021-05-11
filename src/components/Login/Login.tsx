@@ -80,9 +80,6 @@ const Login = ({ onLogin, loading, loginError }: IProps) => {
 		event?.preventDefault();
 
 		if (!loading) {
-			// karinalol854@gmail.com
-			// jo2Fadaqu
-
 			const newValidateErrors = validate();
 
 			if (!newValidateErrors) {
